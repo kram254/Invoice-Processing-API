@@ -1,83 +1,111 @@
-### Invoice-Processing-API
+# Invoice-Processing-API
 
 ## Invoice Processing API Documentation
 
-# Introduction:
-The Invoice Processing API allows users to extract data from invoices and convert it into structured data. It supports PDF, image and text formats. The API can be integrated into an application or a system to automate the process of invoice data extraction.
+### Introduction:
+The Invoice Processing API allows users to extract data from invoices and convert it into structured data. It supports PDF, image and text formats. The API can be integrated into an application or a system to automate the process of invoice data extraction. This RESTful API built with Flask that allows you to process invoices and perform CRUD operations on them. It is built with Flask and uses SQLAlchemy as the ORM. The API also includes an email sending feature and token-based authentication.
 
-# Functionalities:
-
-Extraction of invoice data such as vendor name, invoice number, invoice date, total amount, and line item details.
-Support for different invoice formats including PDF, image and text.
-Ability to handle multiple invoices in a batch.
-Endpoints:
-The API has the following endpoints:
-
-/invoices/upload
-This endpoint is used to upload an invoice to the API. The endpoint supports file formats including PDF, image and text.
-Request:
+### Requirements
+```
+Flask
+Flask-SQLAlchemy
+PyJWT
+Flask-Marshmallow
+```
+### Setup
+Clone the repository
+```
+$ git clone https://github.com/<username>/invoice-processing-api.git
+```
+Change into the repository directory
 
 ```
-POST /invoices/upload
-Content-Type: multipart/form-data
+$ cd invoice-processing-api
 ```
-
-/invoices/extract
-This endpoint is used to extract the data from an uploaded invoice. The extracted data includes vendor name, invoice number, invoice date, total amount, and line item details.
-Request:
+Create a virtual environment and install the required packages
 
 ```
-GET /invoices/extract
-Content-Type: application/json
+$ python -m venv env
+$ source env/bin/activate
+(env) $ pip install -r requirements.txt
+```
+Set the environment variables for the email sending feature
+
+```
+$ export SENDER_EMAIL='you@example.com'
+$ export SENDER_PASSWORD='your_email_password'
+$ export RECIPIENT_EMAIL='recipient@example.com'
 ```
 
-Response:
+Run the API
+```
+(env) $ python app.py
+```
+
+### Endpoints
+Get Invoices
+Retrieve a paginated list of invoices.
 
 ```
-HTTP/1.1 200 OK
-Content-Type: application/json
+GET /invoices
+```
+
+Query Parameters
+```
+page: The page number to retrieve. Default is 1.
+processed: A boolean indicating whether to retrieve processed or unprocessed invoices.
+search: A search string to filter the invoices by invoice number.
+```
+### Example Request
+```
+GET /invoices?page=2&processed=true&search=INV-100
+```
+Example Response
+```
+HTTP 200 OK
+
 {
-    "vendor_name": "ABC Ltd.",
-    "invoice_number": "INV-123",
-    "invoice_date": "2022-12-01",
-    "total_amount": "$1000",
-    "line_items": [
+    "invoices": [
         {
-            "item_name": "Item 1",
-            "quantity": 10,
-            "unit_price": "$100"
-        },
-        {
-            "item_name": "Item 2",
-            "quantity": 5,
-            "unit_price": "$200"
+            "id": 1,
+            "invoice_number": "INV-100",
+            "processed": true,
+            "amount": 100.0,
+            "custom_field_1": "Value 1",
+            "custom_field_2": "Value 2"
         }
-    ]
+    ],
+    "total_pages": 10
 }
 ```
-
-Usage:
-To use the API, follow the below steps:
-
-Upload an invoice to the API using the /invoices/upload endpoint.
-Extract the data from the uploaded invoice using the /invoices/extract endpoint.
-Example:
-Here is an example of how to extract data from an invoice using the API:
-
-python
+Create Invoice
+Create a new invoice.
 
 ```
-import requests
-
-# Step 1: Upload an invoice to the API
-url = "https://api.example.com/invoices/upload"
-files = {'invoice': ('invoice.pdf', open('invoice.pdf', 'rb'), 'application/pdf')}
-response = requests.post(url, files=files)
-
-# Step 2: Extract data from the uploaded invoice
-url = "https://api.example.com/invoices/extract"
-response = requests.get(url)
-data = response.json()
-print(data)
+POST /invoices
 ```
-Note: Replace "https://api.example.com" with the actual API endpoint.
+Request Body
+
+```
+{
+    "invoice_number": "INV-100",
+    "processed": false,
+    "amount": 100.0,
+    "custom_field_1": "Value 1",
+    "custom_field_2": "Value 2"
+}
+```
+Example Request
+```
+POST /invoices
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "invoice_number": "INV-100",
+    "processed": false,
+    "amount": 100.0,
+    "custom_field_1": "Value 1",
+    "custom_field_2": "Value 2"
+}
+```
